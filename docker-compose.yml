@@ -1,0 +1,58 @@
+version: '3.9'
+services:
+
+  mysql:
+    image: mysql:8
+    container_name: woodshop-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: woodshop_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+
+  mongodb:
+    image: mongo:7
+    container_name: woodshop-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: woodshop
+      MONGO_INITDB_ROOT_PASSWORD: woodshop123
+    volumes:
+      - mongodata:/data/db
+
+  redis:
+    image: redis:7
+    container_name: woodshop-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: .
+    container_name: woodshop-backend
+    restart: always
+    depends_on:
+      - mysql
+      - mongodb
+      - redis
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/woodshop_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+
+      MONGO_URI: mongodb://woodshop:woodshop123@mongodb:27017/
+      MONGO_DB: woodshopdb
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+volumes:
+  mysqldata:
+  mongodata:

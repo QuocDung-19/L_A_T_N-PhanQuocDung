@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: ${MONGO_DB}
+
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT}
+
+jwt:
+  secret: "super-secret-key"
+  expiration-ms: 3600000
