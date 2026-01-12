@@ -43,6 +43,7 @@ public class CategoryController {
     ApiResponse<CategoryResponse> update(
             @PathVariable Long id,
             @RequestBody CategoryRequest request) {
+
         return ApiResponse.<CategoryResponse>builder()
                 .message("Cập nhật danh mục")
                 .result(categoryService.update(id, request))

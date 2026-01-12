@@ -14,7 +14,10 @@ spring:
   data:
     redis:
       url: ${REDIS_URL:redis://localhost:6379}
-
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 app:
   time:
     expiryTime: 3600 #giây

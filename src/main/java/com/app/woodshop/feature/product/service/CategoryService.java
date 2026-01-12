@@ -32,8 +32,8 @@ import java.util.List;
         return categoryMapper.toCategoryResponse(categoryRepository.save(category));
     }
 
-    public CategoryResponse update(Long id, CategoryRequest request) {
-        Category category = categoryRepository.findById(id)
+    public CategoryResponse update(Long categoryId, CategoryRequest request) {
+        Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         category.setName(request.getName());
@@ -42,8 +42,8 @@ import java.util.List;
         return categoryMapper.toCategoryResponse(categoryRepository.save(category));
     }
 
-    public void delete(Long id) {
-        Category category = categoryRepository.findById(id)
+    public void delete(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         categoryRepository.delete(category);

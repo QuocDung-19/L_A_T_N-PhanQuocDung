@@ -1,6 +1,7 @@
 package com.app.woodshop.feature.order.service;
 
 import com.app.woodshop.common.enums.OrderStatus;
+import com.app.woodshop.common.enums.PaymentStatus;
 import com.app.woodshop.common.exception.AppException;
 import com.app.woodshop.common.exception.ErrorCode;
 import com.app.woodshop.feature.order.dto.request.OrderCreateRequest;
@@ -27,10 +28,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderService {
+
     OrderRepository orderRepository;
     ProductRepository productRepository;
     UserRepository userRepository;
     OrderMapper orderMapper;
+
+    // ================== QUERY ==================
 
     public List<OrderResponse> findAll() {
         return orderRepository.findAll().stream()
@@ -42,43 +46,63 @@ public class OrderService {
         User user = userRepository.findById(userID)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NO_EXISTS));
 
-        List<Order> orders;
-
-        if (status == null) {
-            orders = orderRepository.findByUser(user);
-        } else {
-            orders = orderRepository.findByUserAndStatus(user, status);
-        }
+        List<Order> orders = (status == null)
+                ? orderRepository.findByUser(user)
+                : orderRepository.findByUserAndStatus(user, status);
 
         return orders.stream()
                 .map(orderMapper::toOrderResponse)
                 .collect(Collectors.toList());
     }
 
+    public OrderResponse findById(Long orderID) {
+        Order order = orderRepository.findById(orderID)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NO_EXISTS));
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    // ================== CREATE ==================
 
     public OrderResponse create(OrderCreateRequest request) {
+
         User user = userRepository.findById(request.getUserID())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NO_EXISTS));
 
         List<OrderDetail> details = request.getItems().stream().map(item -> {
+
             Product product = productRepository.findById(item.getProductID())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NO_EXISTS));
+
+            if (item.getPrice() == null || item.getQuantity() == null) {
+                throw new AppException(ErrorCode.INVALID_REQUEST);
+            }
+
+            BigDecimal unitPrice = item.getPrice(); // giá 1 kiện
+            BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
+
+            BigDecimal finalPrice = unitPrice.multiply(quantity);
 
             return OrderDetail.builder()
                     .product(product)
                     .quantity(item.getQuantity())
-                    .price(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                    .price(finalPrice) 
                     .build();
+
         }).collect(Collectors.toList());
+
+
+        BigDecimal totalAmount = details.stream()
+                .map(OrderDetail::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Order order = Order.builder()
                 .user(user)
                 .orderDate(LocalDate.now())
                 .status(OrderStatus.PENDING)
+                .paymentStatus(PaymentStatus.UNPAID)
+                .totalAmount(totalAmount)
                 .orderDetails(details)
-                .totalAmount(details.stream()
-                        .map(OrderDetail::getPrice)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add))
                 .build();
 
         details.forEach(d -> d.setOrder(order));
@@ -86,20 +110,35 @@ public class OrderService {
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-    public OrderResponse findById(Long orderID) {
+    // ================== UPDATE ==================
+
+    // Staff / Admin xác nhận đơn
+    public OrderResponse updateStatus(Long orderID, OrderStatus status) {
+
         Order order = orderRepository.findById(orderID)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NO_EXISTS));
 
+        // Không cho hủy khi đã thanh toán
+        if (order.getPaymentStatus() == PaymentStatus.PAID
+                && status == OrderStatus.CANCELLED) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        order.setStatus(status);
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-    public OrderResponse updateStatus(Long orderID, OrderStatus request) {
+    // Staff / Admin xác nhận thanh toán
+    public OrderResponse confirmPayment(Long orderID) {
+
         Order order = orderRepository.findById(orderID)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NO_EXISTS));
 
-        order.setStatus(request);
+        if (order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        order.setPaymentStatus(PaymentStatus.PAID);
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
-
-
 }

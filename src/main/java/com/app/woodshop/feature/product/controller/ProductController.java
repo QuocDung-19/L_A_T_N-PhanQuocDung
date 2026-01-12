@@ -1,7 +1,10 @@
 package com.app.woodshop.feature.product.controller;
 
 import com.app.woodshop.common.ApiResponse;
+import com.app.woodshop.feature.product.dto.request.ProductRequest;
+import com.app.woodshop.feature.product.dto.response.ProductResponse;
 import com.app.woodshop.feature.product.entity.Product;
+import com.app.woodshop.feature.product.mapper.ProductMapper;
 import com.app.woodshop.feature.product.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -20,53 +23,75 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProductController {
     ProductService productService;
+    ProductMapper productMapper;
 
     // ================= PUBLIC (User, Customer, Staff, Admin) =================
     @GetMapping
-    ApiResponse<List<Product>> findAll() {
-        return ApiResponse.<List<Product>>builder()
+    ApiResponse<List<ProductResponse>> findAll() {
+        return ApiResponse.<List<ProductResponse>>builder()
                 .message("Lấy danh sách sản phẩm")
-                .result(productService.findAll())
+                .result(productMapper.toProductResponseList(productService.findAll()))
                 .build();
     }
 
+
     @GetMapping("/{productID}")
-    ApiResponse<Product> findById(@PathVariable Long productID) {
-        return ApiResponse.<Product>builder()
+    ApiResponse<ProductResponse> findById(@PathVariable Long productID) {
+        Product product = productService.findById(productID);
+        ProductResponse response = productMapper.toProductResponse(product);
+        return ApiResponse.<ProductResponse>builder()
                 .message("Lấy sản phẩm:" + productID)
-                .result(productService.findById(productID))
+                .result(response)
                 .build();
     }
+
 
     // ==================== ADMIN ONLY ====================
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<Product> create(
+    public ApiResponse<ProductResponse> create(
             @RequestPart("product") String productJson,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @RequestPart(value = "video", required = false) MultipartFile video
     ) throws Exception {
 
         ObjectMapper mapper = new ObjectMapper();
-        Product product = mapper.readValue(productJson, Product.class);
+        ProductRequest request = mapper.readValue(productJson, ProductRequest.class);
 
-        product.setProductID(null);
+        Product product = productService.create(request, image, video);
 
-        return ApiResponse.<Product>builder()
+        ProductResponse response = productMapper.toProductResponse(product);
+
+        return ApiResponse.<ProductResponse>builder()
                 .message("Tạo sản phẩm: " + product.getName())
-                .result(productService.create(product, image, video))
+                .result(response)
                 .build();
     }
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{productID}")
-    ApiResponse<Product> update(@RequestBody Product product) {
-        return ApiResponse.<Product>builder()
-                .message("Cập nhật sản phẩm: " + product.getProductID())
-                .result(productService.update(product))
+    @PutMapping(value = "/{productID}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductResponse> update(
+            @PathVariable Long productID,
+            @RequestPart("product") String productJson,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "video", required = false) MultipartFile video
+    ) throws Exception {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ProductRequest request = mapper.readValue(productJson, ProductRequest.class);
+
+        Product product = productService.update(productID, request, image, video);
+
+        ProductResponse response = productMapper.toProductResponse(product);
+
+        return ApiResponse.<ProductResponse>builder()
+                .message("Cập nhật sản phẩm: " + product.getName())
+                .result(response)
                 .build();
     }
+
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{productID}")

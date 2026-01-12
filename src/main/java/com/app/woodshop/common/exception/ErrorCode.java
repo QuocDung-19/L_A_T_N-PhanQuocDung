@@ -18,7 +18,7 @@ public enum ErrorCode {
     USER_NO_EXISTS(1001,"User không tồn tại", HttpStatus.BAD_REQUEST),
     OTHER_ERROL(9999,"Lỗi khác chưa định nghĩa", HttpStatus.INTERNAL_SERVER_ERROR),
     CATEGORY_NO_EXISTS(1007,"Danh mục không tồn tại",HttpStatus.BAD_REQUEST),
-
+    INVALID_REQUEST(1011,"lỗi không yêu cầu",HttpStatus.BAD_REQUEST),
     CATEGORY_NOT_FOUND(1006,"Category không tồn tại", HttpStatus.BAD_REQUEST),
     CATEGORY_EXISTS(1006,"Category không tồn tại", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED(1010, "Bạn chưa đăng nhập hoặc token không hợp lệ", HttpStatus.BAD_REQUEST);

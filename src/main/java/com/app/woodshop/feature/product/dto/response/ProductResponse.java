@@ -1,25 +1,19 @@
-package com.app.woodshop.feature.product.entity;
+package com.app.woodshop.feature.product.dto.response;
 
 import com.app.woodshop.common.enums.ProductStatus;
-import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "products")
-@Builder
 @Data
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Product {
+public class ProductResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long productID;
-
     String name;
     String description;
     BigDecimal price;
@@ -28,14 +22,12 @@ public class Product {
     Double length;
     Double width;
     Double height;
+    ProductStatus status;
     String imageUrl;
     String videosUrl;
 
-    @Enumerated(EnumType.STRING)
-    ProductStatus status;
 
-
-    @ManyToOne
-    @JoinColumn(name = "categoryID", nullable = false)
-    Category category;
+    Long categoryId;
+    String categoryName;
 }
+

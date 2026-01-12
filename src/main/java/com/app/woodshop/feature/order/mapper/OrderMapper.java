@@ -13,7 +13,12 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
+    @Mapping(target = "orderID", source = "orderID")
     @Mapping(target = "userID", source = "user.userID")
+    @Mapping(target = "orderDate", source = "orderDate")
+    @Mapping(target = "totalAmount", source = "totalAmount")
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "paymentStatus", source = "paymentStatus") 
     @Mapping(target = "items", source = "orderDetails", qualifiedByName = "mapOrderDetails")
     OrderResponse toOrderResponse(Order order);
 

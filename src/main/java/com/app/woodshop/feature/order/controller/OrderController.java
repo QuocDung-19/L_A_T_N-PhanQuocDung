@@ -79,4 +79,16 @@ public class OrderController {
                 .result(orderService.updateStatus(orderID, status))
                 .build();
     }
+
+    // Staff / Admin xác nhận thanh toán
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    @PatchMapping("/{orderID}/confirm-payment")
+    ApiResponse<OrderResponse> confirmPayment(@PathVariable Long orderID) {
+
+        return ApiResponse.<OrderResponse>builder()
+                .message("Xác nhận thanh toán cho đơn hàng")
+                .result(orderService.confirmPayment(orderID))
+                .build();
+    }
+
 }

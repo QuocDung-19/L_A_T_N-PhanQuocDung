@@ -1,6 +1,7 @@
 package com.app.woodshop.feature.order.dto.response;
 
 import com.app.woodshop.common.enums.OrderStatus;
+import com.app.woodshop.common.enums.PaymentStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ public class OrderResponse {
     private LocalDate orderDate;
     private BigDecimal totalAmount;
     private OrderStatus status;
+    private PaymentStatus paymentStatus;
     private List<OrderItemResponse> items;
 
     @Data

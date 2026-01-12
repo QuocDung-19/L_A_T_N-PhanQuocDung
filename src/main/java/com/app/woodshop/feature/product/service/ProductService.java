@@ -2,7 +2,10 @@ package com.app.woodshop.feature.product.service;
 
 import com.app.woodshop.common.exception.AppException;
 import com.app.woodshop.common.exception.ErrorCode;
+import com.app.woodshop.feature.product.dto.request.ProductRequest;
+import com.app.woodshop.feature.product.entity.Category;
 import com.app.woodshop.feature.product.entity.Product;
+import com.app.woodshop.feature.product.repository.CategoryRepository;
 import com.app.woodshop.feature.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,24 +26,77 @@ import java.util.List;
 public class ProductService {
 
     ProductRepository productRepository;
+    CategoryRepository categoryRepository;
 
     // =================== EXISTING (KHÔNG ĐỤNG) ===================
-    public List<Product> findAll() {
-        return productRepository.findAll();
-    }
+    public Product create(ProductRequest request,
+                          MultipartFile image,
+                          MultipartFile video) {
 
-    public Product create(Product product) {
-        if (productRepository.existsByName(product.getName()))
+        if (productRepository.existsByName(request.getName()))
             throw new AppException(ErrorCode.PRODUCT_EXISTS);
 
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        Product product = Product.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .price(request.getPrice())
+                .stock(request.getStock())
+                .piecesNumber(request.getPiecesNumber())
+                .length(request.getLength())
+                .width(request.getWidth())
+                .height(request.getHeight())
+                .imageUrl(request.getImageUrl())       // thêm dòng này
+                .videosUrl(request.getVideosUrl())
+                .status(request.getStatus())
+                .category(category)
+                .build();
+
+        handleUpload(product, image, video);
         return productRepository.save(product);
     }
 
-    public Product update(Product request) {
-        if (!productRepository.existsById(request.getProductID()))
-            throw new AppException(ErrorCode.PRODUCT_NO_EXISTS);
 
-        return productRepository.save(request);
+    public Product update(Long productId,
+                          ProductRequest request,
+                          MultipartFile image,
+                          MultipartFile video) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NO_EXISTS));
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setStock(request.getStock());
+        product.setPiecesNumber(request.getPiecesNumber());
+        product.setLength(request.getLength());
+        product.setWidth(request.getWidth());
+        product.setHeight(request.getHeight());
+        product.setStatus(request.getStatus());
+        product.setCategory(category);
+
+        if (image != null && !image.isEmpty()) {
+            product.setImageUrl(storeFile(image, "images"));
+        } else if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+            product.setImageUrl(request.getImageUrl());
+        }
+
+        if (video != null && !video.isEmpty()) {
+            product.setVideosUrl(storeFile(video, "videos"));
+        } else if (request.getVideosUrl() != null && !request.getVideosUrl().isEmpty()) {
+            product.setVideosUrl(request.getVideosUrl());
+        }
+
+        return productRepository.save(product);
+    }
+    public List<Product> findAll() {
+        return productRepository.findAll();
     }
 
     public Product findById(Long productID) {

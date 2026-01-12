@@ -25,7 +25,7 @@ public class UserController {
     UserService userService;
 
     // CHỈ ADMIN được xem danh sách user
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @GetMapping
     ApiResponse<List<UserResponse>> findAll() {
         return ApiResponse.<List<UserResponse>>builder()
@@ -44,7 +44,7 @@ public class UserController {
     }
 
     // USER chỉ được xem chính họ, ADMIN xem tất cả
-    @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER','STAFF')")
     @GetMapping("/{userID}")
     ApiResponse<UserResponse> findByID(@PathVariable String userID) {
         return ApiResponse.<UserResponse>builder()
