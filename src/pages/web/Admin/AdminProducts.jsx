@@ -63,7 +63,14 @@ export default function AdminProducts({ onReloadStats }) {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
+  const reloadProducts = async () => {
+    try {
+      const data = await getProducts();
+      setProducts(data);
+    } catch (err) {
+      alert("Không thể tải danh sách sản phẩm");
+    }
+  };
 
   return (
     <Box style={{ padding: 20 }}>
@@ -80,11 +87,11 @@ export default function AdminProducts({ onReloadStats }) {
               
         <thead>
           <tr>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>ID</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Tên</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Giá</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Ảnh</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Hành động</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>ID</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Ảnh</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Tên</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Giá</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Hành động</th>
           </tr>
         </thead>
         <tbody>
@@ -94,13 +101,14 @@ export default function AdminProducts({ onReloadStats }) {
             <tr><td colSpan={5} style={{ textAlign: "center", padding: 10 }}>Không có dữ liệu</td></tr>
           ) : (
             displayedProducts.map(p => (
-              <tr key={p.productId}>
+              <tr key={p.productId}>                
                 <td style={{ padding: 8 }}>{p.productId}</td>
-                <td style={{ padding: 8 }}>{p.name}</td>
-                <td style={{ padding: 8 }}>{p.price}</td>
                 <td style={{ padding: 8 }}>
                   {p.imageUrl && <img src={p.imageUrl} width="60" alt={p.name} />}
                 </td>
+                <td style={{ padding: 8 }}>{p.name}</td>
+                <td style={{ padding: 8 }}>{p.price}</td>
+
                 <td style={{ padding: 8, display: "flex", gap: 10 }}>
                   <Button
                     style={{
@@ -143,7 +151,6 @@ export default function AdminProducts({ onReloadStats }) {
       </table>
       <Box
               style={{
-                marginTop: 15,
                 display: "flex",
                 justifyContent: "center",
                 gap: 10,
@@ -200,6 +207,8 @@ export default function AdminProducts({ onReloadStats }) {
                     setProducts([...products, created]);
                     onReloadStats?.();
                   }
+                        await reloadProducts(); 
+                        onReloadStats?.();
                   setModalOpen(false);
                 } catch (err) {
                   alert(err.message);

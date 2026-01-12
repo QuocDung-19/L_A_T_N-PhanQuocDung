@@ -22,7 +22,6 @@ export default function Staff() {
     total: 0,
   });
 
-  // ✅ TÁCH RA HÀM RIÊNG
   const fetchStats = async () => {
     try {
       const orders = await getOrders();
@@ -37,7 +36,6 @@ export default function Staff() {
     }
   };
 
-  // chỉ gọi lần đầu
   useEffect(() => {
     fetchStats();
   }, []);
@@ -50,14 +48,12 @@ export default function Staff() {
         <StaffSidebar active={active} setActive={setActive} />
 
         <main style={{ flex: 1, padding: 28 }}>
-          {/* ===== STATS ===== */}
           <div style={{ display: "flex", gap: 20, marginBottom: 24 }}>
             <StatCard title="Đơn chờ xác nhận" value={stats.pending} bg="#e8f3da" />
             <StatCard title="Đơn đang xử lý" value={stats.confirmed} bg="#f0f0f0" />
             <StatCard title="Tổng đơn" value={stats.total} bg="#eef6ff" />
           </div>
 
-          {/* ===== CONTENT ===== */}
           <div
             style={{
               background: "#ffffff",

@@ -1,16 +1,27 @@
 const API_URL = "http://localhost:8080/api/category";
 
-const getHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
+const getHeaders = () => {
+  const token = localStorage.getItem("token");
+
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
 
 
 export const getCategories = async () => {
-  const res = await fetch(API_URL, { headers: getHeaders() });
+  const res = await fetch(API_URL, {
+    headers: getHeaders(),
+  });
+
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Không thể tải danh mục");
-  return data.result || data;
+
+  if (!res.ok) {
+    throw new Error(data.message || "Không tải được danh mục");
+  }
+
+  return data.result ?? data;
 };
 
 

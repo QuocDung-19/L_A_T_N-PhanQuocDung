@@ -1,6 +1,6 @@
 const PRODUCT_URL = "http://localhost:8080/api/product";
 const CATEGORY_URL = "http://localhost:8080/api/category";
-
+console.log = () => {};
 const getHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
@@ -43,31 +43,35 @@ export const getProducts = async () => {
     console.log("PRODUCT RAW:", p);
 
     console.log("FIELDS CHECK:", {
-       productId: p.productID,  
+        productId: Number(p.productID),
         name: p.name,
         price: p.price,
         description: p.description,
         stock: p.stock,
+        piecesNumber: p.piecesNumber ?? "",
+        length: p.length ?? "",
+        width: p.width ?? "",
+        height: p.height ?? "",
         status: p.status,
-        imageUrl: p.imageUrl,     
-        videoUrl: p.videosUrl,    
-        height: p.height,
-        width: p.width,
-        length: p.length,
+        imageUrl: p.imageUrl,
+        videoUrl: p.videosUrl,
+        categoryId: p.categoryId ?? null,    
     });
 
     const mappedProduct = {
-      productId: p.productID,   
-        name: p.name,
-        price: p.price,
-        description: p.description,
-        stock: p.stock,
-        status: p.status,
-        imageUrl: p.imageUrl,    
-        videoUrl: p.videosUrl,    
-        height: p.height,
-        width: p.width,
-        length: p.length,
+          productId: Number(p.productID),
+          name: p.name,
+          price: p.price,
+          description: p.description,
+          stock: p.stock,
+          piecesNumber: p.piecesNumber ?? "",  
+          length: p.length ?? "",              
+          width: p.width ?? "",                
+          height: p.height ?? "",
+          status: p.status,
+          imageUrl: p.imageUrl,
+          videoUrl: p.videosUrl,
+          categoryId: p.categoryId ?? null,    
     };
 
     console.log("PRODUCT SAU KHI MAP:", mappedProduct);
@@ -86,6 +90,7 @@ export const createProduct = async (formData) => {
   let data = null;
   try {
     data = await res.json();
+     return data.result;
   } catch (e) {
     console.error("Không parse được JSON từ backend");
   }
@@ -104,23 +109,33 @@ export const createProduct = async (formData) => {
 
 
 
-export const updateProduct = async (id, product) => {
+export const updateProduct = async (id, formData) => {
   const res = await fetch(`${PRODUCT_URL}/${id}`, {
     method: "PUT",
-    headers: {
-      ...getHeaders(),
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(product), // ✅ JSON
+    headers: getHeaders(),
+    body: formData,
   });
 
   const data = await res.json();
 
-  if (!res.ok) {
-    throw new Error(data?.message || "Cập nhật sản phẩm thất bại");
-  }
+  if (!res.ok) throw new Error(data?.message || "Cập nhật sản phẩm thất bại");
 
-  return data.result ?? data;
+  const p = data.result ?? data;
+  return {
+    productId: Number(p.productID),
+    name: p.name,
+    price: p.price,
+    description: p.description,
+    stock: p.stock,
+    piecesNumber: p.piecesNumber ?? "",
+    length: p.length ?? "",
+    width: p.width ?? "",
+    height: p.height ?? "",
+    status: p.status,
+    imageUrl: p.imageUrl,
+    videoUrl: p.videosUrl,
+    categoryId: p.categoryId ?? null,
+  };
 };
 
 export const deleteProduct = async (id) => {

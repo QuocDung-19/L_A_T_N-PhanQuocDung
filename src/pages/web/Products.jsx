@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Header from "../../components/Layout/Header";
 import Footer from "../../components/Layout/Footer";
+import { useLocation } from "react-router-dom";
+
+
 
 import Box from "../../components/common/Box";
 import Typography from "../../components/common/Typography";
@@ -17,9 +20,14 @@ import ProductCard from "../../components/Layout/ProductCard";
 import { getPublicProducts } from "../../services/api/productPublicApi";
 
 export default function Products() {
+
+  console.log = () => {};
+  
   const [sort, setSort] = useState("default");
   const [products, setProducts] = useState([]);
   const { addToCart } = useCart();
+  const location = useLocation();
+  const categoryId = new URLSearchParams(location.search).get("category");
 
   useEffect(() => {
     getPublicProducts()
@@ -36,7 +44,9 @@ export default function Products() {
           status: p.status,
           height: p.height, 
           width: p.width,  
+          piecesNumber: p.piecesNumber,
           length: p.length, 
+          categoryId: p.categoryId,
         }));
 
         setProducts(mapped);
@@ -44,19 +54,27 @@ export default function Products() {
       .catch(err => console.error("Lỗi load products:", err));
   }, []);
 
+  const filteredProducts = useMemo(() => {
+  if (!categoryId) return products;
+
+  return products.filter(
+    p => String(p.categoryId) === String(categoryId)
+  );
+}, [products, categoryId]);
+
   const handleSortChange = (e) => setSort(e.target.value);
 
-  const sortedProducts = useMemo(() => {
-    let productsCopy = [...products];
+const sortedProducts = useMemo(() => {
+  let productsCopy = [...filteredProducts];
 
-    if (sort === "priceAsc") {
-      productsCopy.sort((a, b) => a.price - b.price);
-    } else if (sort === "priceDesc") {
-      productsCopy.sort((a, b) => b.price - a.price);
-    }
+  if (sort === "priceAsc") {
+    productsCopy.sort((a, b) => a.price - b.price);
+  } else if (sort === "priceDesc") {
+    productsCopy.sort((a, b) => b.price - a.price);
+  }
 
-    return productsCopy;
-  }, [sort, products]);
+  return productsCopy;
+}, [sort, filteredProducts]);
 
   return (
     <>
@@ -72,7 +90,7 @@ export default function Products() {
           <Box style={{ flex: 1 }}>
             <Box style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 18 }}>
               <Typography variant="body1" style={{ color: "#333" }}>
-                Hiển thị {products.length} sản phẩm
+                Hiển thị {sortedProducts.length} sản phẩm
               </Typography>
 
               <FormControl>

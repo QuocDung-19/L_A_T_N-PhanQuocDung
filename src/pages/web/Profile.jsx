@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../components/Layout/Header";
 import Footer from "../../components/Layout/Footer";
 import Box from "../../components/common/Box";
@@ -9,15 +10,18 @@ import Button from "../../components/common/Button";
 
 import { getUserById, updateUserById } from "../../services/api/userApi";
 import { getOrdersByUser, getOrderById } from "../../services/api/orderApi";
+import { getProducts } from "../../services/api/productApi";
+import CartOrderList from "./CartOrderList";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editUser, setEditUser] = useState(null);
 
-
+const [productMap, setProductMap] = useState({});
 const storedUser = JSON.parse(localStorage.getItem("user"));
 const userID = storedUser?.userID;
 
@@ -34,6 +38,14 @@ const userID = storedUser?.userID;
             ["CONFIRMED", "SHIPPING", "COMPLETED"].includes(o.status)
           )
         );
+
+        const products = await getProducts();
+        const map = {};
+        products.forEach(p => {
+          map[p.productId] = p.name;
+        });
+        setProductMap(map);
+
       } catch (err) {
         alert(err.message);
       }
@@ -43,6 +55,9 @@ const userID = storedUser?.userID;
     fetchData();
   }, []);
 
+  const goToPayment = (orderID) => {
+  navigate(`/payment/${orderID}`);
+};
 
 const handleUpdateProfile = async () => {
   if (!user) return;
@@ -177,7 +192,7 @@ const handleUpdateProfile = async () => {
                       
                           username: user.username,
                           role: user.role,
-                          password: user.password || "",
+                          password: user.password,
 
                     
                           fullName: editUser.fullName,
@@ -212,66 +227,76 @@ const handleUpdateProfile = async () => {
 
 
 
-      <Box style={{ display: "flex", gap: 20 }}>
-        <Card style={{ flex: 1, padding: 30 }}>
-          <Typography variant="h4">Lịch sử đơn hàng</Typography>
-
-          <table width="100%" style={{ marginTop: 15, borderCollapse: "collapse" }}>
-            <thead style={{ background: "#f4f6f8", position: "sticky", top: 0, zIndex: 1 }}>
-              <tr>
-                <th>Order</th>
-                <th>Ngày</th>
-                <th>Tổng</th>
-                <th></th>
-              </tr>
-            </thead>
-
-            <tbody style={{ display: "block", maxHeight: 300, overflowY: "auto" }}>
-              {orders.map(o => (
-                <tr key={o.orderID} style={{ display: "table", width: "100%", tableLayout: "fixed" }}>
-                  <td>#{o.orderID}</td>
-                  <td>{o.orderDate}</td>
-                  <td>{o.totalAmount.toLocaleString()} đ</td>
-                  <td>
-                    <Button onClick={() => openOrderDetail(o.orderID)}>Chi tiết</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-      </Box>
-
           <Card style={{ flex: 1, padding: 30 }}>
-            <Typography variant="h4">Chi tiết đơn hàng</Typography>
+            <Typography variant="h4">Lịch sử đơn hàng</Typography>
 
-            {!selectedOrder ? (
-              <Typography>Chọn đơn hàng để xem</Typography>
-            ) : (
-              <table width="100%" style={{ marginTop: 15 }}>
-                <thead>
+            <Box style={{ maxHeight: 300, overflowY: "auto", marginTop: 15 }}>
+              <table width="100%" style={{ borderCollapse: "collapse" }}>
+                <thead style={{ background: "#f4f6f8" }}>
                   <tr>
-                    <th>Sản phẩm</th>
-                    <th>SL</th>
-                    <th>Giá</th>
-                    <th>Tổng</th>
+                    <th align="left">Order</th>
+                    <th align="left">Ngày</th>
+                    <th align="left">Tổng</th>
+                    <th></th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  {selectedOrder.items.map((i, idx) => (
-                    <tr key={idx}>
-                      <td>#{i.productID}</td>
-                      <td>{i.quantity}</td>
-                      <td>{i.price.toLocaleString()} đ</td>
+                  {orders.map(o => (
+                    <tr key={o.orderID}>
+                      <td>#{o.orderID}</td>
+                      <td>{o.orderDate}</td>
+                      <td>{o.totalAmount.toLocaleString()} đ</td>
                       <td>
-                        {(i.price * i.quantity).toLocaleString()} đ
+                        <Button onClick={() => openOrderDetail(o.orderID)}>
+                          Chi tiết
+                        </Button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </Box>
+
+            {selectedOrder && (
+              <Box style={{ marginTop: 20 }}>
+                <Typography variant="h5" style={{ marginBottom: 10 }}>
+                  Chi tiết đơn #{selectedOrder.orderID}
+                </Typography>
+                <Box
+                  style={{
+                    maxHeight: 300,
+                    overflowY: "auto",
+                    marginBottom: 12,
+                    borderBottom: "1px solid #eee",
+                    paddingBottom: 8,
+                  }}>
+                <CartOrderList order={selectedOrder} />
+                </Box>
+                {selectedOrder.paymentStatus === "UNPAID" && (
+                  <Box
+                    style={{
+                      marginTop: 20,
+                      display: "flex",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Button
+                      style={{
+                        backgroundColor: "#8CBF41",
+                        color: "#fff",
+                        padding: "10px 28px",
+                      }}
+                      onClick={() => goToPayment(selectedOrder.orderID)}
+                    >
+                      Thanh toán đơn hàng →
+                    </Button>
+                  </Box>
+                )}
+              </Box>
             )}
           </Card>
+
         </Box>
 
       <Footer />

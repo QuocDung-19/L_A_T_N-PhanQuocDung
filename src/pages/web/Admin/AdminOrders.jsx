@@ -4,19 +4,30 @@ import Typography from "../../../components/common/Typography";
 import Button from "../../../components/common/Button";
 
 import { getOrders, getOrderById, updateOrderStatus } from "../../../services/api/orderApi";
-
+import { getProducts } from "../../../services/api/productApi";
+import { getUserById } from "../../../services/api/userApi";
 const ORDER_STATUS = ["PENDING", "CONFIRMED", "SHIPPING", "COMPLETED", "CANCELLED"];
 const ROWS_PER_PAGE = 5;
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [userMap, setUserMap] = useState({});
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [status, setStatus] = useState("");
 
+  const [products, setProducts] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    getProducts()
+      .then(data => setProducts(data))
+      .catch(err => console.error("Lỗi load product:", err));
+  }, []);
+
 
   const fetchOrders = async () => {
     setLoadingOrders(true);
@@ -73,6 +84,46 @@ export default function AdminOrders() {
     }
   };
 
+  const getProductName = (productID) => {
+      const product = products.find(
+        p => String(p.productId) === String(productID)
+      );
+      return product ? product.name : "Không xác định";
+    };
+
+    useEffect(() => {
+    const loadUsers = async () => {
+      const missingUserIds = orders
+        .map(o => o.userID)
+        .filter(id => id && !userMap[id]);
+
+      if (missingUserIds.length === 0) return;
+
+      const newUsers = {};
+
+      for (const userID of missingUserIds) {
+        try {
+          const user = await getUserById(userID);
+          newUsers[userID] = user;
+        } catch (err) {
+          console.error("Không load được user:", userID);
+        }
+      }
+
+      if (Object.keys(newUsers).length > 0) {
+        setUserMap(prev => ({ ...prev, ...newUsers }));
+      }
+    };
+
+    if (orders.length > 0) {
+      loadUsers();
+    }
+  }, [orders]);
+
+    const getUsername = (userID) => {
+      return userMap[userID]?.username || "Đang tải...";
+    };
+
   const totalPages = Math.ceil(orders.length / ROWS_PER_PAGE);
   const paginateOrders = orders.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
 
@@ -88,12 +139,12 @@ export default function AdminOrders() {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#f4f6f8" }}>
-                <th>OrderID</th>
-                <th>Khách hàng</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-                <th>Hành động</th>
+                <th align="left">OrderID</th>
+                <th align="left">Khách hàng</th>
+                <th align="left">Tổng tiền</th>
+                <th align="left">Trạng thái</th>
+                <th align="left">Ngày tạo</th>
+                <th align="left">Hành động</th>
               </tr>
             </thead>
 
@@ -113,10 +164,15 @@ export default function AdminOrders() {
                     style={{ borderBottom: "1px solid #eee", background: selectedOrder?.orderID === o.orderID ? "#f1f8ff" : "" }}
                   >
                     <td>#{o.orderID}</td>
-                    <td>{o.user?.username || o.userID || "-"}</td>
+                    <td>
+                      {o.orderID && getUsername(o.userID)}
+                      <div style={{ fontSize: 12, color: "#888" }}>
+                        #{o.user?.userID || o.userID}
+                      </div>
+                    </td>
                     <td>{o.totalAmount?.toLocaleString()} đ</td>
                     <td>{o.status}</td>
-                    <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : "-"}</td>
+                    <td>{o.orderDate ? new Date(o.orderDate).toLocaleDateString() : "-"}</td>
                     <td style={{ display: "flex", gap: 6 }}>
                       {o.status === "PENDING" && (
                         <>
@@ -154,7 +210,16 @@ export default function AdminOrders() {
             <Typography>Đang tải chi tiết đơn hàng...</Typography>
           ) : (
             <>
-              <Typography variant="h5">Đơn hàng #{selectedOrder.orderID}</Typography>
+              <Typography variant="h5">
+                Đơn hàng #{selectedOrder.orderID}
+              </Typography>
+
+              <Typography style={{ fontSize: 14, color: "#555", marginTop: 4 }}>
+                Khách hàng: <b>{getUsername(selectedOrder.userID)}</b>
+                <span style={{ marginLeft: 6, color: "#999" }}>
+                  (#{selectedOrder.userID})
+                </span>
+              </Typography>
 
               <select value={status} onChange={(e) => setStatus(e.target.value)} style={{ width: "100%", padding: 8, marginTop: 8 }}>
                 {ORDER_STATUS.map((s) => (<option key={s} value={s}>{s}</option>))}
@@ -169,10 +234,9 @@ export default function AdminOrders() {
               <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 10,height: '200' }}>
                 <thead>
                   <tr style={{ background: "#f4f6f8" }}>
-                    <th>Sản phẩm</th>
-                    <th>Số lượng</th>
-                    <th>Giá</th>
-                    <th>Tổng</th>
+                    <th align="left">Sản phẩm</th>
+                    <th align="left">Số lượng</th>
+                    <th align="left">Giá</th>
                   </tr>
                 </thead>
                 
@@ -180,10 +244,14 @@ export default function AdminOrders() {
                   {selectedOrder.items?.length > 0 ? (
                     selectedOrder.items.map((item, index) => (
                       <tr key={index}>
-                        <td>Product #{item.productID}</td>
+                        <td>
+                          {getProductName(item.productID)}
+                          <div style={{ fontSize: 12, color: "#888" }}>
+                            #{item.productID}
+                          </div>
+                        </td>
                         <td>{item.quantity}</td>
                         <td>{item.price.toLocaleString()} đ</td>
-                        <td>{(item.price * item.quantity).toLocaleString()} đ</td>
                       </tr>
                     ))
                   ) : (
@@ -194,6 +262,9 @@ export default function AdminOrders() {
                 </tbody>
                 
               </table>
+                  <div style={{ marginTop: 15, fontWeight: 600 }}>
+                     Tổng tiền: {selectedOrder.totalAmount.toLocaleString()} đ
+                  </div>
               </div>
             </>
           )}

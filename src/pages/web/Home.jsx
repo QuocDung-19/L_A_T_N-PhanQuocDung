@@ -11,6 +11,11 @@ import Carousel from "../../components/Layout/Carousel";
 import { useNavigate } from "react-router-dom";
 import bannerImg from "../../assets/banner/banner.png";
 
+import deliveryTruck from "../../assets/images/delivery-truck.png";
+import moneyBags from "../../assets/images/money-bags.png";
+import shield from "../../assets/images/shield.png";
+import trophy from "../../assets/images/trophy.png";
+
 import video1 from "../../assets/images/video1.mp4";
 import video2 from "../../assets/images/video2.mp4";
 import video3 from "../../assets/images/video3.mp4";
@@ -22,12 +27,6 @@ import {
 } from "../../services/api/productPublicApi";
 import { getNewsList } from "../../services/api/newsApi";
 
-const testimonials = [
-  { id: 1, name: "Nguyễn Văn A", avatar: "/images/avatar1.jpg", comment: "Sản phẩm rất chất lượng!" },
-  { id: 2, name: "Trần Thị B", avatar: "/images/avatar2.jpg", comment: "Dịch vụ tốt, hỗ trợ nhanh." },
-  { id: 3, name: "Lê Văn C", avatar: "/images/avatar3.jpg", comment: "Đóng gói cẩn thận, giao nhanh." },
-  { id: 4, name: "Phạm Thị D", avatar: "/images/avatar3.jpg", comment: "Tôi rất hài lòng." },
-];
 
 const companyImages = [1, 2, 3, 4];
 
@@ -148,25 +147,25 @@ useEffect(() => {
                 title: "CHẤT LƯỢNG NHẤT",
                 desc: "P.Q.D luôn đảm bảo chất lượng cao cho từng sản phẩm trước khi đến tay khách hàng.",
                 color: "#f1c40f",
-                icon: "🛡️",
+                image: shield,
               },
               {
                 title: "GIÁ TỐT NHẤT",
                 desc: "Sản phẩm đến tay khách hàng với mức giá cạnh tranh nhất trên thị trường.",
                 color: "#3498db",
-                icon: "💰",
+                image: moneyBags,
               },
               {
                 title: "UY TÍN NHẤT",
                 desc: "Chúng tôi đặt chữ tín lên hàng đầu, phát triển bền vững cùng đối tác.",
                 color: "#9b59b6",
-                icon: "🏆",
+                image: trophy,
               },
               {
                 title: "GIAO NHANH NHẤT",
                 desc: "Cam kết giao hàng nhanh chóng, an toàn với chi phí tối ưu.",
                 color: "#e74c3c",
-                icon: "🚚",
+                image: deliveryTruck,
               },
             ].map((item, index) => (
               <Box
@@ -177,21 +176,29 @@ useEffect(() => {
                   padding: "20px",
                 }}
               >
-                <Box
+              <Box
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  borderRadius: "50%",
+                  border: `5px solid ${item.color}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 15px",
+                  background: "#fff",
+                }}
+              >
+                <img
+                  src={item.image}
+                  alt={item.title}
                   style={{
-                    width: "80px",
-                    height: "80px",
-                    borderRadius: "50%",
-                    border: `5px solid ${item.color}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "32px",
-                    margin: "0 auto 15px",
+                    width: 40,
+                    height: 40,
+                    objectFit: "contain",
                   }}
-                >
-                  {item.icon}
-                </Box>
+                />
+              </Box>
 
                 <Typography variant="subtitle1" style={{ fontWeight: 700 }}>
                   {item.title}
@@ -270,25 +277,6 @@ useEffect(() => {
           )}
 
           </Box>
-
-
-          <Box style={{ flexDirection: "column", gap: "20px" }}>
-            <Typography variant="h5">Ý kiến khách hàng</Typography>
-            <Grid container spacing={20}>
-              {testimonials.map((t) => (
-                <Grid item columns={4} key={t.id}>
-                  <Card style={{ padding: "20px" }}>
-                    <Box style={{ flexDirection: "row", gap: "10px", alignItems: "center" }}>
-                      <Avatar src={t.avatar} size={50} />
-                      <Typography>{t.name}</Typography>
-                    </Box>
-                    <Typography style={{ marginTop: "10px" }}>{t.comment}</Typography>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-
 
           <Box style={{ flexDirection: "column", gap: "10px" }}>
             <Typography variant="h5">Hình ảnh công ty</Typography>

@@ -7,7 +7,6 @@ import Box from "../../components/common/Box";
 import Typography from "../../components/common/Typography";
 import Grid from "../../components/common/Grid";
 import Card, { CardMedia, CardContent } from "../../components/common/Card";
-import Rating from "../../components/common/Rating";
 import Carousel from "../../components/Layout/Carousel";
 import { useNavigate } from "react-router-dom";
 import CartItemList, { useCart } from "./CartItemList";
@@ -28,11 +27,13 @@ export default function ProductDetail() {
         name: p.name,
         price: p.price,
         image: p.imageUrl || "/images/no-image.png",
+        videoUrl: p.videosUrl || "",
         description: p.description || "Mô tả sản phẩm...",
         rating: p.rating || 4,
         reviews: p.reviews || 0,
         stock: p.stock,
         status: p.status,
+        piecesNumber: p.piecesNumber,
         height: p.height, 
         width: p.width,  
         length: p.length, 
@@ -42,7 +43,10 @@ export default function ProductDetail() {
   }, []);
 
   const product = products.find(p => p.id === parseInt(id));
+
   if (!product) return <Typography variant="h5" style={{ textAlign: "center", marginTop: 50 }}>Sản phẩm không tồn tại</Typography>;
+
+    const isOutOfStock = product.status === "OUT_OF_STOCK";
 
   const relatedProducts = products.filter(p => p.id !== product.id).slice(0, 6);
 
@@ -57,47 +61,93 @@ export default function ProductDetail() {
 
           <Grid container spacing={40} style={{ display: "flex", flexWrap: "nowrap" }}>
             <Grid item columns={6}>
-                <Box>
-                  <div>
-                    <img
-                      src={product.image}
-                      alt={product.name}
+              <Box style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  style={{
+                    maxWidth: "400px",
+                    maxHeight: "350px",
+                    width: "100%",
+                    objectFit: "contain",
+                  }}
+                />
+
+                <Box
+                  style={{
+                    border: "1px solid #ddd",
+                    borderRadius: 8,
+                    padding: 12,
+                    background: "#fafafa",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    style={{ fontWeight: 700, marginBottom: 8 }}
+                  >
+                    Video review sản phẩm
+                  </Typography>
+
+                  {product.videoUrl ? (
+                    <video
+                      src={product.videoUrl}
+                      controls
+                      poster={product.image} 
                       style={{
-                        maxWidth: "400px",  
-                        maxHeight: "350px",  
-                        width: "100%",      
-                        height: "auto",     
-                        objectFit: "contain" 
-                      }}
+                      width: "100%",
+                      height: 200,
+                      objectFit: "cover",
+                      borderRadius: 6,
+                    }}
                     />
-                  </div>
+
+                  ) : (
+                    <Typography variant="body2" style={{ color: "#777" }}>
+                      Chưa có video review cho sản phẩm này
+                    </Typography>
+                  )}
                 </Box>
+
+              </Box>
             </Grid>
+
 
             <Grid item columns={6}>
               <Box style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                 <Typography variant="h4" style={{ color: "#8CBF41" }}>{product.name}</Typography>
                 <Typography variant="body2" style={{ color: "#555", fontSize: 20, fontWeight: 500, margin: "8px 0" }}>
-                            {product.height} x {product.length} x {product.width} Cm
+                            {product.height} x {product.length} x {product.width} Mm = {product.piecesNumber} thanh
                 </Typography>
+                  <Typography variant="body2" style={{ color: "#555", fontSize: 16, fontWeight: 500 }}>
+                            Tình trạng: {isOutOfStock ? "Hết hàng" : "Còn hàng"}
+                  </Typography>
+             
                 <Typography variant="h3" style={{ color: "#d35400", fontWeight: "bold" }}>{product.price?.toLocaleString("vi-VN")} ₫</Typography>
-                <Typography variant="body1">{product.description}</Typography>
-                    <button
-                      onClick={() => addToCart(product, 1)}
-                      style={{
-                        marginTop: "20px",
-                        padding: "12px 20px",
-                        fontSize: "16px",
-                        background: "#8CBF41",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        width: "200px"
-                      }}
-                    >
-                      Thêm vào giỏ
-                    </button>
+                <Typography
+                  variant="body1"
+                  style={{ whiteSpace: "pre-line" }}
+                >
+                  {product.description}
+                </Typography>
+                  <button
+                    onClick={() => addToCart(product, 1)}
+                    disabled={isOutOfStock}
+                    style={{
+                      marginTop: "20px",
+                      padding: "12px 20px",
+                      fontSize: "16px",
+                      background: isOutOfStock ? "#ccc" : "#8CBF41",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor: isOutOfStock ? "not-allowed" : "pointer",
+                      width: "200px",
+                    }}
+                  >
+                    {isOutOfStock ? "Hết hàng" : "Thêm vào giỏ"}
+                  </button>
+
               </Box>
             </Grid>
           </Grid>
@@ -116,7 +166,7 @@ export default function ProductDetail() {
               <Typography variant="body1"><strong>Phôi Cao Su Ván:</strong></Typography>
               <Typography variant="body2">Tên sản phẩm: Phôi Cao Su Tẩm Sấy</Typography>
               <Typography variant="body2">
-                ✅ Quy cách: Phôi Cao Su Ván – 21×45-75×200-350/400-600
+                Quy cách: Phôi Cao Su Ván – 21×45-75×200-350/400-600
               </Typography>
               <Typography variant="body2">hất lượng: AB – Phôi Thân</Typography>
               <Typography variant="body2">Số lượng: SL lớn, cung cấp theo đơn</Typography>

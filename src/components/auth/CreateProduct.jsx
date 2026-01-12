@@ -1,18 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Box from "../common/Box";
 import TextField from "../common/TextField";
 import Button from "../common/Button";
 import Typography from "../common/Typography";
 import Textarea from "../common/Textarea";
+import { getCategories } from "../../services/api/categoryApi";
 
 export default function CreateProduct({ product, onClose, onCreated }) {
+
   const [name, setName] = useState(product?.name || "");
   const [description, setDescription] = useState(product?.description || "");
-  const [price, setPrice] = useState(product?.price ?? 0);
-  const [stock, setStock] = useState(product?.stock ?? 0);
-  const [length, setLength] = useState(product?.length ?? 0);
-  const [width, setWidth] = useState(product?.width ?? 0);
-  const [height, setHeight] = useState(product?.height ?? 0);
+  const [price, setPrice] = useState(product?.price ?? "");
+  const [stock, setStock] = useState(product?.stock ?? "");
+  const [piecesNumber, setPiecesNumber] = useState(product?.piecesNumber ?? "");
+  const [length, setLength] = useState(product?.length ?? "");
+  const [width, setWidth] = useState(product?.width ?? "");
+  const [height, setHeight] = useState(product?.height ?? "");
 
   const [imageFile, setImageFile] = useState(null);
   const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
@@ -20,12 +23,57 @@ export default function CreateProduct({ product, onClose, onCreated }) {
   const [videosUrl, setVideosUrl] = useState(product?.videosUrl || "");
 
   const [status, setStatus] = useState(product?.status || "ACTIVE");
+  const [categoryId, setCategoryId] = useState(product?.categoryId ?? "");
   const [uploading, setUploading] = useState(false);
+
+  const [categories, setCategories] = useState([]);
 
   const CLOUD_NAME = "ddyu7bjsd";      
   const UPLOAD_PRESET = "product_upload";
 
- 
+  const [showStockList, setShowStockList] = useState(false);
+  const [showPiecesList, setShowPiecesList] = useState(false);
+  const [showLengthList, setShowLengthList] = useState(false);
+  const [showWidthList, setShowWidthList] = useState(false);
+  const [showHeightList, setShowHeightList] = useState(false);
+    
+      const stockOptions = Array.from(
+        { length: (100 - 10) / 10 + 1 },
+        (_, i) => 10 + i * 10
+      );
+
+      const piecesOptions = Array.from(
+        { length: (2000 - 100) / 100 + 1 },
+        (_, i) => 100 + i * 100
+      );
+
+      const heightOptions = Array.from(
+        { length: 75 - 18 + 1 },
+        (_, i) => 18 + i
+      );
+
+     const widthOptions = Array.from(
+        { length: 105 - 21 + 1 },
+        (_, i) => 21 + i
+      );
+
+      const lengthOptions = Array.from(
+        { length: (2000 - 100) / 100 + 1 },
+        (_, i) => 100 + i * 100
+      );
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch (e) {
+        alert("Không tải được danh mục");
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const uploadToCloudinary = async (file, type = "image") => {
     const formData = new FormData();
     formData.append("file", file);
@@ -45,7 +93,6 @@ export default function CreateProduct({ product, onClose, onCreated }) {
     return data.secure_url;
   };
 
-
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -62,7 +109,6 @@ export default function CreateProduct({ product, onClose, onCreated }) {
       setUploading(false);
     }
   };
-
 
   const handleVideoChange = async (e) => {
     const file = e.target.files[0];
@@ -81,29 +127,24 @@ export default function CreateProduct({ product, onClose, onCreated }) {
     }
   };
 
-
   const handleSubmit = async () => {
-    if (!name || price <= 0) {
-      alert("Vui lòng nhập tên và giá hợp lệ");
-      return;
-    }
+    if (!name || price <= 0) return alert("Vui lòng nhập tên và giá hợp lệ");
+    if (!categoryId) return alert("Vui lòng chọn danh mục");
 
     const productObj = {
       name,
       description,
       price,
       stock,
+      piecesNumber,
       length,
       width,
       height,
       status,
       imageUrl,
       videosUrl,
+      categoryId: Number(categoryId),
     };
-
-    if (product?.productId) {
-      productObj.productID = product.productId;
-    }
 
     const formData = new FormData();
     formData.append(
@@ -111,12 +152,12 @@ export default function CreateProduct({ product, onClose, onCreated }) {
       new Blob([JSON.stringify(productObj)], { type: "application/json" })
     );
 
-    if (videoFile) formData.append("video", videoFile);
-
-    if (product?.productId) {
-      await onCreated(productObj);
-    } else {
-      await onCreated(formData);
+    try {
+      const result = await onCreated(formData);
+      return result;
+    } catch (err) {
+      alert("Lưu sản phẩm thất bại");
+      console.error(err);
     }
   };
 
@@ -172,15 +213,15 @@ export default function CreateProduct({ product, onClose, onCreated }) {
         <Box style={{ flex: 1 }}>
           <TextField label="Tên sản phẩm" value={name} onChange={(e) => setName(e.target.value)} />
           <Box mb={2}>
-          <Textarea
-            label="Mô tả sản phẩm"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Nhập mô tả chi tiết sản phẩm..."
-            minHeight={120}
-            maxHeight={300}
-          />
-        </Box>
+            <Textarea
+              label="Mô tả sản phẩm"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Nhập mô tả chi tiết sản phẩm..."
+              minHeight={120}
+              maxHeight={300}
+            />
+          </Box>
           <TextField
             label="Giá (VNĐ)"
             type="number"
@@ -201,20 +242,258 @@ export default function CreateProduct({ product, onClose, onCreated }) {
           <TextField label="Hoặc URL video" value={videosUrl} onChange={(e) => setVideosUrl(e.target.value)} />
         </Box>
 
+        <Box style={{ marginBottom: 15 }}>
+          <Typography>Danh mục</Typography>
+          <select
+            value={categoryId ?? ""}
+            onChange={(e) => setCategoryId(e.target.value)}
+            style={{
+              width: "100%",
+              padding: 8,
+              borderRadius: 4,
+              border: "1px solid #ccc",
+            }}
+          >
+            <option value="">-- Chọn danh mục --</option>
+            {categories.map((c) => (
+              <option key={c.categoryId} value={c.categoryId}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </Box>
+
         <Box style={{ flex: 1 }}>
-          <TextField
-            label="Số lượng tồn kho"
-            type="number"
-            value={stock}
-            onChange={(e) => setStock(Number(e.target.value))}
-          />
+          <Box style={{ position: "relative" }}>
+            <TextField
+              label="Số kiện tồn kho"
+              type="number"
+              value={stock}
+              onFocus={() => setShowStockList(true)}
+              onChange={(e) => setStock(Number(e.target.value))}
+              onBlur={() => setTimeout(() => setShowStockList(false), 150)}
+            />
+
+            {showStockList && (
+              <Box
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  right: 0,
+                  background: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: 6,
+                  maxHeight: 150,
+                  overflowY: "auto",
+                  zIndex: 20,
+                  marginTop: 4,
+                }}
+              >
+                {stockOptions.map(v => (
+                  <Box
+                    key={v}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setStock(v);
+                      setShowStockList(false);
+                    }}
+                    style={{
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {v}
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+
+
+          <Box style={{ position: "relative" }}>
+            <TextField
+              label="Số thanh trong 1 kiện"
+              type="number"
+              value={piecesNumber}
+              onFocus={() => setShowPiecesList(true)}
+              onChange={(e) => setPiecesNumber(Number(e.target.value))}
+              onBlur={() => setTimeout(() => setShowPiecesList(false), 150)}
+            />
+
+            {showPiecesList && (
+              <Box
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  right: 0,
+                  background: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: 6,
+                  maxHeight: 180,
+                  overflowY: "auto",
+                  zIndex: 20,
+                  marginTop: 4,
+                }}
+              >
+                {piecesOptions.map(v => (
+                  <Box
+                    key={v}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setPiecesNumber(v);
+                      setShowPiecesList(false);
+                    }}
+                    style={{ padding: "8px 12px", cursor: "pointer" }}
+                  >
+                    {v}
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+
+
 
           <Typography variant="body2" style={{ marginTop: 10 }}>
             Kích thước (cm)
           </Typography>
-          <TextField label="Chiều dài" type="number" value={length} onChange={(e) => setLength(Number(e.target.value))} />
-          <TextField label="Chiều rộng" type="number" value={width} onChange={(e) => setWidth(Number(e.target.value))} />
-          <TextField label="Mặt" type="number" value={height} onChange={(e) => setHeight(Number(e.target.value))} />
+          <Box style={{ position: "relative" }}>
+            <TextField
+              label="Chiều dài (mm)"
+              type="number"
+              value={length}
+              onFocus={() => setShowLengthList(true)}
+              onChange={(e) => setLength(Number(e.target.value))}
+              onBlur={() => setTimeout(() => setShowLengthList(false), 150)}
+            />
+
+            {showLengthList && (
+              <Box
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  right: 0,
+                  background: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: 6,
+                  maxHeight: 200,
+                  overflowY: "auto",
+                  zIndex: 20,
+                  marginTop: 4,
+                }}
+              >
+                {lengthOptions.map(v => (
+                  <Box
+                    key={v}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setLength(v);
+                      setShowLengthList(false);
+                    }}
+                    style={{ padding: "8px 12px", cursor: "pointer" }}
+                  >
+                    {v}
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+
+          <Box style={{ position: "relative" }}>
+            <TextField
+              label="Chiều rộng (mm)"
+              type="number"
+              value={width}
+              onFocus={() => setShowWidthList(true)}
+              onChange={(e) => setWidth(Number(e.target.value))}
+              onBlur={() => setTimeout(() => setShowWidthList(false), 150)}
+            />
+
+            {showWidthList && (
+              <Box
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  right: 0,
+                  background: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: 6,
+                  maxHeight: 200,
+                  overflowY: "auto",
+                  zIndex: 20,
+                  marginTop: 4,
+                }}
+              >
+                {widthOptions.map((v) => (
+                  <Box
+                    key={v}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setWidth(v);
+                      setShowWidthList(false);
+                    }}
+                    style={{ padding: "8px 12px", cursor: "pointer" }}
+                  >
+                    {v}
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+
+
+          <datalist id="width-list">
+            {widthOptions.map(v => (
+              <option key={v} value={v} />
+            ))}
+          </datalist>
+
+          <Box style={{ position: "relative" }}>
+          <TextField
+            label="Chiều dày / Mặt (mm)"
+            type="number"
+            value={height}
+            onFocus={() => setShowHeightList(true)}
+            onChange={(e) => setHeight(Number(e.target.value))}
+            onBlur={() => setTimeout(() => setShowHeightList(false), 150)}
+          />
+
+          {showHeightList && (
+            <Box
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                background: "#fff",
+                border: "1px solid #ccc",
+                borderRadius: 6,
+                maxHeight: 200,
+                overflowY: "auto",
+                zIndex: 20,
+                marginTop: 4,
+              }}
+            >
+              {heightOptions.map((v) => (
+                <Box
+                  key={v}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setHeight(v);
+                    setShowHeightList(false);
+                  }}
+                  style={{ padding: "8px 12px", cursor: "pointer" }}
+                >
+                  {v}
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
 
           <Typography variant="body2" style={{ marginTop: 10 }}>
             Trạng thái

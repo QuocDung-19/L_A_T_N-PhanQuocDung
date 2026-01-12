@@ -12,6 +12,9 @@ import {
 } from "../../../services/api/categoryApi";
 
 export default function AdminCategories() {
+
+  console.log = () => {};
+
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -34,22 +37,22 @@ export default function AdminCategories() {
     fetchCategories();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa danh mục này?")) return;
-    try {
-      await deleteCategory(id);
-      setCategories(categories.filter((c) => c.id !== id));
-      setSuccessMessage("Xóa danh mục thành công");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+const handleDelete = async (id) => {
+  if (!window.confirm("Bạn có chắc muốn xóa danh mục này?")) return;
+  try {
+    await deleteCategory(id);
+    setCategories(categories.filter((c) => c.categoryId !== id));
+    setSuccessMessage("Xóa danh mục thành công");
+    setTimeout(() => setSuccessMessage(""), 3000);
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
   const filteredCategories = categories.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
   );
-
+console.log("CATEGORIES RAW:", categories);
   return (
     <Box style={{ padding: 20 }}>
       <Typography variant="h4" style={{ marginBottom: 20 }}>
@@ -80,15 +83,15 @@ export default function AdminCategories() {
       <table width="100%">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Tên</th>
-            <th>Hành động</th>
+            <th align="left">ID</th>
+            <th align="left">Tên</th>
+            <th align="left">Hành động</th>
           </tr>
         </thead>
         <tbody>
           {filteredCategories.map((c) => (
-            <tr key={c.id}>
-              <td>{c.id}</td>
+            <tr key={c.categoryId}>
+              <td>{c.categoryId}</td>
               <td>{c.name}</td>
               <td style={{ padding: 8, display: "flex", gap: 10 }}>
                 <Button
@@ -99,7 +102,7 @@ export default function AdminCategories() {
                     alignItems: "center",
                     justifyContent: "center",
                   }}
-                  onClick={() => handleDelete(c.id)}
+                  onClick={() => handleDelete(c.categoryId)}
                 >
                   <img
                     src={trashIcon}
@@ -108,7 +111,6 @@ export default function AdminCategories() {
                   />
                 </Button>
               </td>
-
             </tr>
           ))}
         </tbody>

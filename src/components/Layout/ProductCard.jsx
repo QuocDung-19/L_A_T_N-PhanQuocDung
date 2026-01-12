@@ -7,6 +7,9 @@ import Card, { CardMedia, CardContent } from "../../components/common/Card";
 import Typography from "../../components/common/Typography";
 
 export default function ProductCard({ product }) {
+
+  console.log = () => {};
+
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showLoginPopup, setShowLoginPopup] = useState(false);
@@ -102,7 +105,7 @@ const status = getStatusInfo();
                       fontWeight: 600,
                     }}
                   >
-                    {product.height} x {product.length} x {product.width} Cm
+                    {product.height} x {product.length} x {product.width} = {product.piecesNumber} thanh
                   </div>
 
                   <span
@@ -144,8 +147,8 @@ const status = getStatusInfo();
           </Box>
 
           <CardContent>         
-          <Typography variant="body2" style={{ color: "#555", fontSize: 20, fontWeight: 500, margin: "0px 5px 5px" }}>
-            {product.height} x {product.length} x {product.width} Cm
+          <Typography variant="body2" style={{ color: "#555", fontSize: 15, fontWeight: 500, margin: "0px 5px 5px" }}>
+            Quy cách: {product.height} x {product.length} x {product.width} = {product.piecesNumber}
           </Typography>
 
             <Typography variant="body1" style={{ fontWeight: 800,margin: "0px 5px" }}>

@@ -67,11 +67,11 @@ export default function AdminNews({ onReloadStats }) {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>ID</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Tiêu đề</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Hình ảnh</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Trạng thái</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Hành động</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>ID</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Tiêu đề</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Hình ảnh</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Trạng thái</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Hành động</th>
           </tr>
         </thead>
         <tbody>
@@ -81,11 +81,11 @@ export default function AdminNews({ onReloadStats }) {
             <tr><td colSpan={5} style={{ textAlign: "center", padding: 10 }}>Không có dữ liệu</td></tr>
           ) : currentData.map(n => (
             <tr key={n.newsID}>
-              <td style={{ padding: 8 }}>{n.newsID}</td>
-              <td style={{ padding: 8 }}>{n.title}</td>
+              <td style={{ padding: 8 }}>{n.newsID}</td>              
               <td style={{ padding: 8 }}>
                 {n.imageUrl && <img src={n.imageUrl} alt={n.title} width={60} style={{ objectFit: "cover", borderRadius: 4 }} />}
               </td>
+              <td style={{ padding: 8 }}>{n.title}</td>
               <td style={{ padding: 8 }}>{n.status}</td>
               <td style={{ padding: 8, display: "flex", gap: 10 }}>
                 <Button
@@ -127,7 +127,6 @@ export default function AdminNews({ onReloadStats }) {
         </tbody>
       </table>
 
-      {/* pagination */}
       {totalPages > 1 && (
         <Box style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: 10, marginTop: 10 }}>
           <Button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
@@ -136,7 +135,6 @@ export default function AdminNews({ onReloadStats }) {
         </Box>
       )}
 
-      {/* modal */}
       {modalOpen && (
         <div style={{
           position: "fixed", top: 0, left: 0, width: "100%", height: "100%",

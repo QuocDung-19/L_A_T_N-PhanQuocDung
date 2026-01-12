@@ -1,7 +1,6 @@
 const API_URL = "http://localhost:8080/api/product";
 const CATEGORY_URL = "http://localhost:8080/api/category";
 
-// USER KHÔNG CÓ TOKEN
 
 export const getPublicCategories = async () => {
   const res = await fetch(CATEGORY_URL);

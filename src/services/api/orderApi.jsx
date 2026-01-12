@@ -1,5 +1,5 @@
 const API_URL = "http://localhost:8080/api/order";
-
+console.log = () => {};
 const getHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
   "Content-Type": "application/json",

@@ -27,7 +27,7 @@ export default function Textarea({
         placeholder={placeholder}
         disabled={disabled}
         style={{
-          width: "100%",
+
           minHeight,
           maxHeight,
           padding: "12px",

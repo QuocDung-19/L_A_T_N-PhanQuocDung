@@ -27,6 +27,7 @@ import AdminManageAccounts from "./pages/web/Admin/AdminManageAccounts";
 import AdminProducts from "./pages/web/Admin/AdminProducts";
 import AdminOrders from "./pages/web/Admin/AdminOrders";
 import AdminNews from "./pages/web/Admin/AdminNews";
+import CheckoutPage from "./pages/web/CheckoutPage";
 
 function App() {
   return (
@@ -35,13 +36,13 @@ function App() {
         <CartProvider> 
         <Routes>
 
-          {/* AUTH */}
+        
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* ADMIN */}
+     
           <Route
             path="/admin"
             element={
@@ -58,7 +59,7 @@ function App() {
             <Route path="news" element={<AdminNews />} />
           </Route>
 
-          {/* STAFF */}
+        
           <Route
             path="/staff"
             element={
@@ -68,12 +69,13 @@ function App() {
             }
           />
 
-          {/* MAIN */}
+        
           <Route path="/" element={<MainLayout><Home /></MainLayout>} />
           <Route path="/products" element={<MainLayout><Products /></MainLayout>} />
           <Route path="/news" element={<MainLayout><News /></MainLayout>} />
           <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
-          <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
+          <Route path="/profile" element={<MainLayout> <ProtectedRoute><Profile /></ProtectedRoute></MainLayout>} />
+          <Route path="/payment/:orderID" element={<MainLayout> <CheckoutPage /> </MainLayout>} />
 
           <Route
             path="/products/:id"

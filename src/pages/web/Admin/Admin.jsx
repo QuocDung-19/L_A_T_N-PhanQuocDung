@@ -9,7 +9,7 @@ import AdminProducts from "./AdminProducts";
 import AdminOrders from "./AdminOrders";
 import AdminNews from "./AdminNews";
 
-// ===== API =====
+
 import { getAccounts } from "../../../services/api/accountApi";
 import { getProducts } from "../../../services/api/productApi";
 import { getOrders } from "../../../services/api/orderApi";
@@ -58,7 +58,7 @@ export default function Admin() {
         <AdminSidebar active={active} setActive={setActive} />
 
         <main style={{ flex: 1, padding: 28, height: 850 }}>
-          {/* ===== STAT CARDS ===== */}
+
           <div style={{ display: "flex", gap: 20, marginBottom: 24 }}>
             <StatCard title="Tài khoản" value={stats.accounts} />
             <StatCard title="Sản phẩm" value={stats.products} />
@@ -66,7 +66,7 @@ export default function Admin() {
             <StatCard title="Tin tức" value={stats.news} />
           </div>
 
-          {/* ===== MAIN CONTENT ===== */}
+
           <div
             style={{
               background: "#ffffff",
@@ -91,7 +91,7 @@ export default function Admin() {
   );
 }
 
-// ===== STAT CARD =====
+
 function StatCard({ title, value }) {
   return (
     <div

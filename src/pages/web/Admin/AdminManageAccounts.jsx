@@ -12,6 +12,8 @@ import trashIcon from "../../../assets/images/trash.png";
 
 export default function AdminManageAccounts({ onReloadStats }) {
 
+  console.log = () => {};
+
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -113,10 +115,10 @@ export default function AdminManageAccounts({ onReloadStats }) {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>User ID</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Username</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Role</th>
-            <th style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Hành động</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>User ID</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Username</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Role</th>
+            <th align="left" style={{ borderBottom: "1px solid #ccc", padding: 8 }}>Hành động</th>
           </tr>
         </thead>
         <tbody>

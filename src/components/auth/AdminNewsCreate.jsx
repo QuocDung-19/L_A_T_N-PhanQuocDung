@@ -13,7 +13,7 @@ export default function CreateNews({ news, onClose, onCreated }) {
   const [imageUrl, setImageUrl] = useState(news?.imageUrl || "");
   const [uploading, setUploading] = useState(false);
 
-  const CLOUD_NAME = "ddyu7bjsd"; // thay bằng cloud name của bạn
+  const CLOUD_NAME = "ddyu7bjsd"; 
   const UPLOAD_PRESET = "product_upload";
 
   const uploadToCloudinary = async (file) => {
