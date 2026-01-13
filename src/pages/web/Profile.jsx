@@ -94,10 +94,10 @@ const handleUpdateProfile = async () => {
     <>
       <Header />
 
-      <Box style={{ padding: 40, background: "#f5f7f5" }}>
+      <Box style={{ padding: 40, background: "#f5f7f5", alignItems: "center" }}>
 
         {user && (
-          <Card style={{ padding: 30, marginBottom: 30 }}>
+          <Card style={{ padding: 30, marginBottom: 30, width: "80%" }}>
             <Typography variant="h3" style={{ color: "#8CBF41" }}>
               Thông tin cá nhân
             </Typography>
@@ -227,7 +227,7 @@ const handleUpdateProfile = async () => {
 
 
 
-          <Card style={{ flex: 1, padding: 30 }}>
+          <Card style={{ flex: 1, padding: 30, width: "80%" }}>
             <Typography variant="h4">Lịch sử đơn hàng</Typography>
 
             <Box style={{ maxHeight: 300, overflowY: "auto", marginTop: 15 }}>

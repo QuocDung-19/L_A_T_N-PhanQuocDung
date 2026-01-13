@@ -1,14 +1,10 @@
-const API_URL = "http://localhost:8080/api/user";
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 
-/**
- * Lấy token từ localStorage
- */
+const API_URL = `${API_BASE_URL}/user`;
+
 const getToken = () => localStorage.getItem("token");
 
-
-/**
- * Headers chuẩn có Authorization
- */
 const getHeaders = () => ({
   "Content-Type": "application/json",
   Authorization: `Bearer ${getToken()}`,
